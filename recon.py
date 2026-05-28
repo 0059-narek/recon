@@ -110,6 +110,30 @@ try:
 except Exception as e:
     print(f"{Y}[!] Synapsint error: {e}{C}")
 
+# subdomainfinder.c99.nl
+print(f"{Y}[*] Running subdomainfinder enumeration...{C}", end="\r")
+syn_start = time.time()
+
+try:
+    subdomainfinder_url = "https://subdomainfinder.c99.nl/scans/2026-05-25/"
+    end_url = f"{subdomainfinder_url}{target}"
+    response = requests.get(end_url, timeout=15)
+    soup = BeautifulSoup(response.text, "html.parser")
+    result = soup.find_all("a", class_="link sd")
+
+    with open('subdomainfinder.txt', 'w') as f:
+        for link in result:
+            href = link.get('href')
+            if href and target in href:
+                # ՈՒՂՂՈՒՄ. lstrip("/")-ը հեռացնում է տողի ձախ կողմի բոլոր թեք գծերը
+                clean_href = href.lstrip("/")
+                f.write(clean_href + "\n")
+    
+    syn_end = time.time()
+    print(f"{G}[+] Running Subdomainfinder enumeration DONE! ({round(syn_end - syn_start, 2)}s){C}")
+except Exception as e:
+    print(f"{Y}[!] Subdomainfinder error: {e}{C}")
+
 script_end = time.time()
 total_duration = script_end - total_start
 
@@ -117,13 +141,14 @@ print(f"\n{G}[!] Recon complete! Total time: {round(total_duration, 2)}s{C}")
 print(f"[!] Results are sorted. Run 'ls' to see the files.")
 
 # sort
-sort = f"cat {subfinder} synapsint.txt {sublist3r} | sort -u > sort.txt"
+sort = f"cat {subfinder} subdomainfinder.txt synapsint.txt {sublist3r} | sort -u > sort.txt"
 run_silent(sort, "Merging and sorting subdomains")
 
 # del
 os.remove(subfinder)
 os.remove(sublist3r)
 #os.remove('synapsint.txt')
+#os.remove(subdomainfinder.txt)
 
 # httpx 
 httpx = f"cat sort.txt | httpx -sc -title -td -t 20 -o live.txt"
