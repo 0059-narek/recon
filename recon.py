@@ -22,7 +22,7 @@ def show_banner():
  ███  ███ ███  ███      ██      ██     ██   ██ ██      ██      ██    ██ ██  ██ ██ 
   ██████   ██████  ███████      ██     ██   ██ ███████  ██████  ██████  ██   ████ 
                                                                                   
-                          {Y}v1.2 - Created by Narek0059{C}
+                          {Y}v1.1 - Created by Narek0059{C}
     """
     print(banner)
 
@@ -115,7 +115,7 @@ print(f"{Y}[*] Running subdomainfinder enumeration...{C}", end="\r")
 syn_start = time.time()
 
 try:
-    subdomainfinder_url = "https://subdomainfinder.c99.nl/scans/2026-05-25/"
+    subdomainfinder_url = "https://subdomainfinder.c99.nl/scans/2026-06-19/"
     end_url = f"{subdomainfinder_url}{target}"
     response = requests.get(end_url, timeout=15)
     soup = BeautifulSoup(response.text, "html.parser")
@@ -134,6 +134,10 @@ try:
 except Exception as e:
     print(f"{Y}[!] Subdomainfinder error: {e}{C}")
 
+# crt.sh
+sublist3rr = f'''curl -s "https://crt.sh/?q={target}&output=json" | jq -r '.[].name_value' | sed 's/\*\.//g' | sort -u > crt.txt'''
+run_silent(sublist3rr, "Running Crt.sh enumeration")
+
 script_end = time.time()
 total_duration = script_end - total_start
 
@@ -141,14 +145,14 @@ print(f"\n{G}[!] Recon complete! Total time: {round(total_duration, 2)}s{C}")
 print(f"[!] Results are sorted. Run 'ls' to see the files.")
 
 # sort
-sort = f"cat {subfinder} subdomainfinder.txt synapsint.txt {sublist3r} | sort -u > sort.txt"
+sort = f"cat {subfinder} subdomainfinder.txt synapsint.txt crt.txt {sublist3r} | sort -u > sort.txt"
 run_silent(sort, "Merging and sorting subdomains")
 
 # del
-os.remove(subfinder)
-os.remove(sublist3r)
+#os.remove(subfinder)
+#os.remove(sublist3r)
 #os.remove('synapsint.txt')
-#os.remove(subdomainfinder.txt)
+#os.remove('subdomainfinder.txt')
 
 # httpx 
 httpx = f"cat sort.txt | httpx -sc -title -td -t 20 -o live.txt"
